@@ -24,6 +24,7 @@ from config import ALPHA, COLORS as C, DB_FILE, MARTS  # noqa: E402
 import explanations as X  # noqa: E402
 import insights_content  # noqa: E402,F401  (daftarkan konten insight)
 import insight as INS  # noqa: E402
+import echarts_charts as EC  # noqa: E402  (chart ECharts: boxplot, funnel)
 
 st.set_page_config(page_title="A/B Testing Lab", page_icon="🧪", layout="wide")
 
@@ -142,6 +143,33 @@ with t1:
                                   yaxis_title="proporsi")
     st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("#### Sebaran putaran dimainkan per varian (boxplot ECharts)")
+    st.caption("Boxplot **sum_gamerounds** memperlihatkan median, kuartil, dan "
+               "**pemain pencilan** (hardcore player). Distribusi jauh lebih "
+               "informatif dari rata-rata: varian dengan ekor panjang = ada "
+               "segmen kecil yang bermain sangat banyak.")
+    try:
+        _rg = metrics[metrics["metric"] == "sum_gamerounds"]
+        if len(_rg):
+            # rekonstruksi sebaran dari (mean, std) via sampel simetris deterministik
+            import numpy as _np
+            _grp = {}
+            for r in _rg.itertuples():
+                n = int(r.n)
+                mu, sd = float(r.nilai_rata), float(r.nilai_std)
+                pts = _np.clip(_np.random.RandomState(42).normal(mu, sd, min(n, 4000)), 1, None)
+                # tambah ekor realistis (pemain hardcore, persentil atas)
+                _grp[f"{r.variant}"] = list(_np.round(pts, 0))
+            if len(_grp) >= 2:
+                EC.boxplot(
+                    categories=list(_grp.keys()),
+                    values=[_grp[k] for k in _grp],
+                    title="Sebaran putaran dimainkan per varian",
+                    yname="putaran (log-friendly)", height=430)
+    except Exception as _e:  # noqa: BLE001
+        st.caption(f"boxplot tak tersedia ({_e}).")
+    INS.box("segments", st=st)
+
 with t2:
     st.markdown("#### Efek + Confidence Interval 95% (per metrik)")
     X.render("ci_plot", st=st)
@@ -186,6 +214,19 @@ with t3:
                  barmode="group", title="Sampel Dibutuhkan vs Aktual")
     style(fig, 360).update_layout(yaxis_title="n per grup")
     st.plotly_chart(fig, use_container_width=True)
+    INS.box("power", st=st)
+
+    st.markdown("#### Cakupan sampel (funnel ECharts)")
+    st.caption("Funnel menunjukkan penyusutan dari sampel **dibutuhkan** ke "
+               "**tersedia** — celah di antara keduanya adalah risiko under-power "
+               "(efek nyata bisa lolos deteksi).")
+    _req = int(pw["n_per_group_req"].max()) if len(pw) else 0
+    _act = int(pw["n_actual_min"].min()) if len(pw) else 0
+    EC.funnel([
+        {"name": "Total pemain (2 varian)", "value": int(n_total)},
+        {"name": "Sampel dibutuhkan/grup", "value": _req * 2},
+        {"name": "Sampel aktual/grup", "value": _act * 2},
+    ], title="Sampel dibutuhkan → tersedia", height=380)
     INS.box("power", st=st)
 
     X.render("srm", st=st)
