@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from config import ALPHA, COLORS as C, DB_FILE, MARTS  # noqa: E402
 import explanations as X  # noqa: E402
+import insights_content  # noqa: E402,F401  (daftarkan konten insight)
+import insight as INS  # noqa: E402
 
 st.set_page_config(page_title="A/B Testing Lab", page_icon="🧪", layout="wide")
 
@@ -107,6 +109,7 @@ if len(ret7):
     kpi(k4, "Efek retensi-7", f"{r['rel_lift_pct']:+.2f}%",
         "p_adj=" + f"{r['p_value_adj']:.3f}",
         C["red"] if r["rel_lift_pct"] < 0 else C["primary"])
+INS.box("kpi", st=st)
 st.write("")
 
 t1, t2, t3, t4 = st.tabs(["📊 Hasil Uji", "📉 Efek + CI", "⚡ Power & SRM",
@@ -124,6 +127,7 @@ with t1:
                        "ci_low", "ci_high", "p_value", "p_value_adj",
                        "signifikan_adj", "test_used"]],
                  use_container_width=True, hide_index=True)
+    INS.box("result_table", st=st)
 
     st.markdown("#### Tingkat retensi per varian")
     rv = metrics[metrics["metric"].str.startswith("retention")]
@@ -159,6 +163,7 @@ with t2:
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Batang CI tidak melewati 0 → efek signifikan. Perhatikan "
                "RETENSI-7: efek negatif signifikan (CI seluruhnya < 0).")
+    INS.box("ci_plot", st=st)
 
     st.markdown("#### Efek heterogen per segmen engagement (retensi-7)")
     X.render("segments", st=st)
@@ -170,6 +175,7 @@ with t2:
                                   title="Lift Retensi-7 per Segmen (%)",
                                   yaxis_title="rel-lift %", xaxis_title="")
     st.plotly_chart(fig, use_container_width=True)
+    INS.box("segments", st=st)
 
 with t3:
     X.render("power", st=st)
@@ -180,10 +186,12 @@ with t3:
                  barmode="group", title="Sampel Dibutuhkan vs Aktual")
     style(fig, 360).update_layout(yaxis_title="n per grup")
     st.plotly_chart(fig, use_container_width=True)
+    INS.box("power", st=st)
 
     X.render("srm", st=st)
     st.dataframe(srm, use_container_width=True, hide_index=True)
     st.caption("SRM p-value tinggi (tidak ada mismatch) → eksperimen valid.")
+    INS.box("srm", st=st)
 
 with t4:
     X.render("method", st=st)
