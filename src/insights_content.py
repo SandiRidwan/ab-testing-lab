@@ -154,3 +154,55 @@ register(
         "setiap keputusan menyertakan justifikasi yang dapat diaudit."),
     tingkat="tinggi",
 )
+
+
+# --------------------------------------------------------------------------
+# Chart ECharts (v2) — insight & rekomendasi agar sejajar chart Plotly lain.
+# --------------------------------------------------------------------------
+
+register(
+    "echarts_boxplot",
+    kesimpulan=(
+        "Sebaran putaran dimainkan (sum_gamerounds) antar varian. Kedua gerbang "
+        "punya median & sebaran serupa, tetapi keduanya berekor sangat panjang: "
+        "segelintir pemain bermain ratusan hingga >1.000 putaran (pencilan), "
+        "sementara mayoritas hanya puluhan. Artinya rata-rata mudah tertarik ke "
+        "atas oleh minoritas 'hardcore', sehingga median/kuartil lebih jujur "
+        "daripada mean untuk menilai engagement khas pemain."),
+    rekomendasi=[
+        "Gunakan median & kuartil (bukan rata-rata) saat melaporkan engagement "
+        "khas; cantumkan pencilan secara terpisah.",
+        "Segmen pemain hardcore (>~300 putaran) untuk analisis tersendiri — "
+        "kelompok kecil ini menyumbang sebagian besar total waktu main.",
+        "Bila menguji perubahan gerbang, uji juga per-segmen (kasual vs hardcore), "
+        "karena efek bisa berbeda di tiap ekor distribusi.",
+    ],
+    risiko=(
+        "Mengambil keputusan dari rata-rata yang terdistorsi pencilan berisiko "
+        "menyesatkan: perubahan tampak kecil padahal berdampak pada segmen inti "
+        "(atau sebaliknya). Pencilan juga bisa jadi bot/QA, bukan pemain nyata."),
+    tingkat="sedang",
+)
+
+register(
+    "echarts_funnel",
+    kesimpulan=(
+        "Funnel cakupan sampel membandingkan jumlah pemain tersedia, sampel "
+        "aktual per grup, dan sampel yang SECARA STATISTIK dibutuhkan untuk "
+        "mendeteksi efek sekecil yang diamati. Bila kebutuhan > aktual untuk "
+        "suatu metrik, eksperimen under-powered: efek nyata bisa lolos deteksi "
+        "(false negative), bukan berarti efeknya tidak ada."),
+    rekomendasi=[
+        "Sebelum membaca 'tidak signifikan', periksa funnel ini — pastikan "
+        "sampel aktual ≥ kebutuhan untuk metrik yang diputuskan.",
+        "Untuk metrik under-powered, kumpulkan sampel tambahan atau longgarkan "
+        "efek minimum yang ingin dideteksi (MDE).",
+        "Jangan menyimpulkan 'aman' dari p-value besar bila power rendah — "
+        "bedakan 'tidak ada efek' dari 'tidak terdeteksi'.",
+    ],
+    risiko=(
+        "Menganggap fitur netral hanya karena p-value besar padahal sampel "
+        "kurang berisiko merilis perubahan yang sebenarnya merugikan (atau "
+        "membatalkan yang menguntungkan)."),
+    tingkat="tinggi",
+)

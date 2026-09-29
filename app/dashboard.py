@@ -168,7 +168,7 @@ with t1:
                     yname="putaran (log-friendly)", height=430)
     except Exception as _e:  # noqa: BLE001
         st.caption(f"boxplot tak tersedia ({_e}).")
-    INS.box("segments", st=st)
+    INS.box("echarts_boxplot", st=st)
 
 with t2:
     st.markdown("#### Efek + Confidence Interval 95% (per metrik)")
@@ -227,7 +227,7 @@ with t3:
         {"name": "Sampel dibutuhkan/grup", "value": _req * 2},
         {"name": "Sampel aktual/grup", "value": _act * 2},
     ], title="Sampel dibutuhkan → tersedia", height=380)
-    INS.box("power", st=st)
+    INS.box("echarts_funnel", st=st)
 
     X.render("srm", st=st)
     st.dataframe(srm, use_container_width=True, hide_index=True)
