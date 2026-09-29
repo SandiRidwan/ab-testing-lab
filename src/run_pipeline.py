@@ -33,7 +33,7 @@ def main() -> int:
     steps = []
     if not args.no_ingest:
         steps.append(SRC / "ingest.py")
-    steps += [SRC / "load_db.py", SRC / "analyze.py",
+    steps += [SRC / "load_db.py", SRC / "analyze.py", SRC / "decide_actions.py",
               ROOT / "tests" / "test_data_quality.py"]
     if not args.no_charts:
         steps.append(SRC / "make_charts.py")

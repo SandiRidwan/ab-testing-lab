@@ -134,3 +134,23 @@ register(
         "tidak bereksperimen sama sekali."),
     tingkat="rendah",
 )
+
+
+# --- Decision engine: keputusan terukur (skor + tier + justifikasi) ---
+register(
+    "decision",
+    kesimpulan=(
+        "Selain narasi, sistem kini menghasilkan SKOR KEPUTUSAN numerik per item "
+        "(anomali/negara/ticker/metrik) berbasis sinyal berbobot, lalu memetakan "
+        "ke TIER AKSI via ambang. Keputusan dapat dibandingkan & diurutkan."),
+    rekomendasi=[
+        "Jalankan item dengan tier prioritas tertinggi lebih dulu.",
+        "Sesuaikan bobot sinyal & ambang tier di config sesuai kebijakan organisasi.",
+        "Audit tiap keputusan lewat skor & justifikasi terukurnya.",
+    ],
+    risiko=(
+        "Keputusan tanpa skor terukur cenderung subjektif & tidak konsisten. "
+        "Namun skor pun bisa salah bila formulasi sinyal keliru — karena itu "
+        "setiap keputusan menyertakan justifikasi yang dapat diaudit."),
+    tingkat="tinggi",
+)
