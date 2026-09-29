@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Uji deterministik penuh: rebuild analisis dari dataset publik (tanpa
+      # kredensial) → tulis marts → jalankan uji validitas statistik.
+      - name: Run analysis pipeline (ingest → analyze)
+        run: python src/run_pipeline.py --no-charts
+
+      - name: Audit narasi (Kenapa·Tujuan·Dampak & Insight)
+        run: |
+          python src/explanations.py
+          python -c "import sys; sys.path.insert(0,'src'); import insights_content; import insight; sys.exit(0 if insight.audit() else 1)"
+
+      - name: Data quality & validity tests
+        run: python tests/test_data_quality.py
